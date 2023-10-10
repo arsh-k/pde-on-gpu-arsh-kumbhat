@@ -38,7 +38,8 @@ default(size=(1200, 800), framestyle=:box, label=false, grid=false, margin=10mm,
             end
             iter += 1
         end
-        C[2:end] -= vx .* dt .* diff(C) ./dx
+        C[2:end]    -= max(vx, 0.0) .* dt .* diff(C) ./dx
+        C[1:end-1]  -= min(vx, 0.0) .* dt .* diff(C) ./dx
     end
     display(plot(xc, [C_i, C]; xlims=(0, lx), ylims=(-0.1, 2.0),
     xlabel="lx", ylabel="Concentration", title = "Implicit 1-D Advection-Diffusion"))

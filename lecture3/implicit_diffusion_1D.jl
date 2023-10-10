@@ -26,7 +26,7 @@ default(size=(1200, 800), framestyle=:box, label=false, grid=false, margin=10mm,
     # iteration loop
     anim = @animate for it = 1:nt
         C_old .= C
-        iter = 1; err = 2ϵtol; iter_evo = Float64[]; err_evo = Float64[]
+        iter   = 1; err = 2ϵtol; iter_evo = Float64[]; err_evo = Float64[]
         while err >= ϵtol && iter <= maxiter
             qx         .-= dτ ./ (ρ .+ dτ / dc) .* (qx ./ dc .+ diff(C) ./ dx)
             C[2:end-1] .-= dτ ./ (1.0 .+ dτ / dt) .* ((C[2:end-1] - C_old[2:end-1]) ./ dt .+ diff(qx) ./ dx)
@@ -35,8 +35,8 @@ default(size=(1200, 800), framestyle=:box, label=false, grid=false, margin=10mm,
                 push!(iter_evo, iter / nx); push!(err_evo, err)
             end
             iter += 1
-            p1 = plot(xc, [xC_old, C]; xlims=(0, lx), ylims=(-0.1, 2.0),
-            xlabel="lx", ylabel="Concentration", title="iter/nx=$(round(iter/nx,sigdigits=3))")
+            p1 = plot(xc, [C_old, C]; xlims=(0, lx), ylims=(-0.1, 2.0),
+            xlabel="lx", ylabel="Concentration", title="it=$it")
             p2 = plot(iter_evo, err_evo; xlabel="iter/nx", ylabel="err",
             yscale=:log10, grid=true, markershape=:circle, markersize=10)
             display(plot(p1, p2; layout=(2, 1)))
