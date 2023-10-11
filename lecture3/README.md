@@ -29,6 +29,6 @@ We now couple the transient-diffusion process with advection (physical time step
 
 ### Exercise 4
 
-We take up the problem solved in Exercise 1 and attempt to find a parameter suitable for our pseudo time-steps, we observed that for an re (Reynolds number) of 1.1 or 1 times 2π the number of iterations per finite difference cell (iter/nx) is the lowest for our solver to converge. 
+We take up the problem solved in Exercise 1 and attempt to find a parameter suitable for our pseudo time-steps that will help accelerate our convergence. we observed that for an re (Reynolds number) of 1.1 or 1 times 2π the number of iterations per finite difference cell (iter/nx) is the lowest for our solver to converge. 
 
 ![Figure 5](./docs/parametric_estimation.png)
