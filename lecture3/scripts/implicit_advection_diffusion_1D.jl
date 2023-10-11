@@ -11,7 +11,7 @@ default(size=(1200, 800), framestyle=:box, label=false, grid=false, margin=10mm,
     ϵtol    = 1e-8
     maxiter = 50nx
     ncheck  = ceil(Int, 0.25nx)
-    nt = 10
+    nt      = 10
     # derived numerics and physics
     dx      = lx / nx
     dt      = dx/abs(vx)
@@ -41,7 +41,7 @@ default(size=(1200, 800), framestyle=:box, label=false, grid=false, margin=10mm,
         C[2:end]    -= max(vx, 0.0) .* dt .* diff(C) ./dx
         C[1:end-1]  -= min(vx, 0.0) .* dt .* diff(C) ./dx
     end
-    display(plot(xc, [C_i, C]; xlims=(0, lx), ylims=(-0.1, 2.0),
+    display(plot(xc, [C_i, C]; xlims=(0, lx), ylims=(-0.1, 2.0), label = ["Initial Concentration" "C(x,t)"],
     xlabel="lx", ylabel="Concentration", title = "Implicit 1-D Advection-Diffusion"))
     savefig("implicit_advection_diffusion_1D.png")
 end

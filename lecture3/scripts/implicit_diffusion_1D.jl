@@ -1,20 +1,20 @@
 using Plots, Plots.Measures, Printf
 default(size=(1200, 800), framestyle=:box, label=false, grid=false, margin=10mm, lw=6, labelfontsize=20, tickfontsize=20, titlefontsize=24)
 
-@views function steady_diffusion_1D()
+@views function implicit_transient_diffusion_1D()
     # physics
     lx      = 20.0
     dc      = 1.0
     da      = 1000.0
     re      = π + sqrt(π^2 + da)
     ρ       = (lx / (dc * re))^2
-    dt       = lx^2 / dc / da
+    dt      = lx^2 / dc / da
     # numerics
     nx      = 100
     ϵtol    = 1e-8
     maxiter = 50nx
     ncheck  = ceil(Int, 0.25nx)
-    nt = 10
+    nt      = 10
     # derived numerics
     dx      = lx / nx
     xc      = LinRange(dx / 2, lx - dx / 2, nx)
@@ -22,6 +22,7 @@ default(size=(1200, 800), framestyle=:box, label=false, grid=false, margin=10mm,
     # array initialisation
     C       = @. 1.0 + exp(-(xc - lx / 4)^2) - xc / lx
     C_old   = copy(C)
+    C_i     = copy(C)
     qx      = zeros(Float64, nx - 1)
     # iteration loop
     anim = @animate for it = 1:nt
@@ -35,14 +36,14 @@ default(size=(1200, 800), framestyle=:box, label=false, grid=false, margin=10mm,
                 push!(iter_evo, iter / nx); push!(err_evo, err)
             end
             iter += 1
-            p1 = plot(xc, [C_old, C]; xlims=(0, lx), ylims=(-0.1, 2.0),
-            xlabel="lx", ylabel="Concentration", title="it=$it")
+            p1 = plot(xc, [C_i, C]; xlims=(0, lx), ylims=(-0.1, 2.0), label = ["Initial Concentration" "C(x,t)"],
+            xlabel="lx", ylabel="Concentration", title="Transient Diffusion  - it=$it")
             p2 = plot(iter_evo, err_evo; xlabel="iter/nx", ylabel="err",
-            yscale=:log10, grid=true, markershape=:circle, markersize=10)
+            yscale=:log10, grid=true, markershape=:circle, markersize=10, title = "Error Analysis")
             display(plot(p1, p2; layout=(2, 1)))
         end
     end
-    gif(anim, "anim.gif"; fps = 2)
+    gif(anim, "implicit_diffusion_1D.gif"; fps = 2)
 end
 
-steady_diffusion_1D()
+implicit_transient_diffusion_1D()

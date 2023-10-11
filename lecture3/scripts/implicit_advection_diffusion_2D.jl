@@ -35,10 +35,11 @@ default(size=(1200, 800), framestyle=:box, label=false, grid=false, margin=10mm,
         while err >= ϵtol && iter <= maxiter
             qx              .-= dτ ./ (ρ .+ dτ / dc) .* (qx ./ dc .+ diff(C, dims = 1) ./ dx)
             qy              .-= dτ ./ (ρ .+ dτ / dc) .* (qy ./ dc .+ diff(C, dims = 2) ./ dy)
-            C[2:end-1,:]    .-= dτ ./ (1.0 .+ dτ / dt) .* ((C[2:end-1,:] - C_old[2:end-1,:]) ./ dt .+ diff(qx, dims = 1) ./ dx )
-            C[:,2:end-1]    .-= dτ ./ (1.0 .+ dτ / dt) .* ((C[:,2:end-1] - C_old[:, 2:end-1]) ./ dt .+ diff(qy, dims = 2) ./dy)
+            ∇q                = diff(qx, dims = 1)[:,2:end-1] ./ dx 
+            ∇q               += diff(qy, dims = 2)[2:end-1,:] ./ dy
+            C[2:end-1,2:end-1]   .-= dτ ./ (1.0 .+ dτ / dt) .* ((C[2:end-1,2:end-1] - C_old[2:end-1,2:end-1]) ./ dt .+ ∇q)
             if iter % ncheck == 0
-                err = maximum(abs.(diff(dc .* diff(C, dims = 1) ./ dx, dims = 1) ./ dx .+ diff(dc .* diff(C, dims = 2) ./ dy, dims = 2) ./ dy .- (C[2:end-1, 2:end-1] - C_old[2:end-1, 2:end-1]) ./ dt))
+                err = maximum(abs.(diff(dc .* diff(C, dims = 1) ./ dx, dims = 1)[:,2:end-1] ./ dx + diff(dc .* diff(C, dims = 2) ./ dy, dims = 2)[2:end-1,:] ./ dy .- (C[2:end-1,2:end-1] - C_old[2:end-1,2:end-1]) ./ dt))
                 push!(iter_evo, iter / nx); push!(err_evo, err)
                 # visualisation
                 p1 = heatmap(xc,yc,C';xlims=(0,lx),ylims=(0,ly),clims=(0,1),aspect_ratio=1,
@@ -49,8 +50,12 @@ default(size=(1200, 800), framestyle=:box, label=false, grid=false, margin=10mm,
             end
             iter += 1
         end
-        # C[2:end]    -= max(vx, 0.0) .* dt .* diff(C) ./dx
-        # C[1:end-1]  -= min(vx, 0.0) .* dt .* diff(C) ./dx
+        #(199,200)
+        # ∇C = diff(C, dims = 1)[:2:end-1] ./dx
+        C[2:end, :]     -= max(vx, 0.0) .* dt .* diff(C, dims = 1) ./dx
+        C[1:end-1, :]   -= min(vx, 0.0) .* dt .* diff(C, dims = 1) ./dx
+        C[:, 2:end]     -= max(vy, 0.0) .* dt .* diff(C, dims = 2) ./dy
+        C[:, 1:end-1]   -= min(vy, 0.0) .* dt .* diff(C, dims = 2) ./dy
     end
     gif(anim, "implicit_advection_diffusion_2D.gif"; fps = 2)
 end
