@@ -17,7 +17,7 @@ The final concentration and the initial concentration for the one-dimensional ad
 
 ##### Task 1
 
-The following figure represents transient-diffusion in a 2D setting with physical time steps nt = 50. The initial condition is similar to a Gaussian shifted from the origin, at which the concentration slowly reduces with each time step. (indicated by color changes at the peak)  
+The following figure represents transient-diffusion in a 2D setting with physical time steps nt = 50. The initial condition is similar to a Gaussian shifted from the origin, at which the concentration slowly reduces with each time step (indicated by color changes at the peak).  
 
 ![Figure 3](./docs/implicit_diffusion_2D.gif)
 
@@ -29,6 +29,6 @@ We now couple the transient-diffusion process with advection (physical time step
 
 ### Exercise 4
 
-We take up the problem solved in Exercise 1 and attempt to find a parameter suitable for our pseudo time-steps, we observed that for an re (Reynolds number) of 1.1 or 1 times 2$\pi$ the number of iterations per finite difference cell (iter/nx) is the lowest for our solver to converge. 
+We take up the problem solved in Exercise 1 and attempt to find a parameter suitable for our pseudo time-steps, we observed that for an re (Reynolds number) of 1.1 or 1 times 2\pi the number of iterations per finite difference cell (iter/nx) is the lowest for our solver to converge. 
 
 ![Figure 5](./docs/parametric_estimation.png)
