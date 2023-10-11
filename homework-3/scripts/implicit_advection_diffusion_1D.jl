@@ -1,7 +1,7 @@
 using Plots, Plots.Measures, Printf
 default(size=(1200, 800), framestyle=:box, label=false, grid=false, margin=10mm, lw=6, labelfontsize=20, tickfontsize=20, titlefontsize=24)
 
-@views function steady_diffusion_1D()
+@views function implicit_adv_diff_1D()
     # physics
     lx      = 20.0
     dc      = 1.0
@@ -46,4 +46,4 @@ default(size=(1200, 800), framestyle=:box, label=false, grid=false, margin=10mm,
     savefig("implicit_advection_diffusion_1D.png")
 end
 
-steady_diffusion_1D()
+implicit_adv_diff_1D()
