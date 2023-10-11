@@ -15,6 +15,7 @@ default(size=(1200, 800), framestyle=:box, label=false, grid=false, margin=10mm,
     # derived numerics
     dx      = lx / nx
     xc      = LinRange(dx / 2, lx - dx / 2, nx)
+    # parameter search loop
     for ifact in eachindex(fact)
         re      = 2π*fact[ifact]
         ρ       = (lx/(dc*re))^2

@@ -28,9 +28,10 @@ default(size=(1200, 800), framestyle=:box, label=false, grid=false, margin=10mm,
     C_old   = copy(C)
     qx      = zeros(Float64, nx - 1, ny) #(199,201)
     qy      = zeros(Float64, nx, ny - 1) #(200,200)
-    # iteration loop
+    # physical time loop
     anim = @animate for it = 1:nt
         C_old .= C
+        # iteration loop
         iter = 1; err = 2ϵtol; iter_evo = Float64[]; err_evo = Float64[]
         while err >= ϵtol && iter <= maxiter
             qx              .-= dτ ./ (ρ .+ dτ / dc) .* (qx ./ dc .+ diff(C, dims = 1) ./ dx)
