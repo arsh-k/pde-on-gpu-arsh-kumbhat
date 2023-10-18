@@ -20,11 +20,11 @@ The number of iterations per finite difference cell for a fully-coupled implicit
 
 ##### Task 3
 
-For `Ra = 10`, it can be observed that the Gaussian peak diffuses quickly in comparison to convection (i.e., the movement of the peak in the y-direction). There is little or no motion of the peak in the y-direction.
+For `Ra = 10`, it can be observed that the Gaussian peak diffuses quickly in comparison to convection. There is little or no motion of the peak in the y-direction.
 
 ![Figure 3](./docs/porous_convection_2D_implicit_Ra_10.gif)
 
-For `Ra = 40`, the Gaussian peak has greater motion in the y-direction as compared to the previous case, but still not enough to result in convection (it diffuses faster).
+For `Ra = 40`, the Gaussian peak has greater motion in the y-direction as compared to the previous case, the diffusion is still faster compared to convective transport but convection begins to occur.
 
 ![Figure 4](./docs/porous_convection_2D_implicit_Ra_40.gif)
 
@@ -42,4 +42,4 @@ $$
 Ra = \frac{\text{Time scale for diffusive transport}}{\text{Time scale for thermal convective thermal transport}}
 $$
 
-The above formula also suggests that greater the Rayleigh number, the greater is the time taken for diffusive thermal transport is greater compared to convection.
+The above formula also suggests that greater the Rayleigh number, the greater is the time taken for diffusive thermal transport compared to convection.
