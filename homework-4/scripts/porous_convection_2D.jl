@@ -68,8 +68,8 @@ default(size=(1200, 800), framestyle=:box, label=false, grid=false, margin=10mm,
         end
         dt_adv                    = ϕ*min(dx/maximum(abs.(qDx)), dy/maximum(abs.(qDy)))/2.1
         dt                        = min(dt_diff,dt_adv)
-        qTx[2:end-1,:]           .= -λ_ρCp.*diff(T, dims = 1)
-        qTy                      .= -λ_ρCp.*diff(T, dims = 2)
+        qTx[2:end-1,:]           .= -λ_ρCp.*diff(T, dims = 1)./dx
+        qTy                      .= -λ_ρCp.*diff(T, dims = 2)./dy
         dT_dtadv                 .= 0.0
         T[:,2:end-1]            .-= dt.*(diff(qTx[:,2:end-1], dims =1)./dx + diff(qTy, dims =2)./dy) 
         dT_dtadv                .-= dt ./ ϕ .*max.(qDx[2:end-2, 2:end-1],0.0) .* diff(T[1:end-1, 2:end-1], dims = 1)./dx

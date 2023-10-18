@@ -74,8 +74,8 @@ default(size=(1200, 800), framestyle=:box, label=false, grid=false, margin=10mm,
             #Temperature Update 
             dt_adv                    = ϕ*min(dx/maximum(abs.(qDx)), dy/maximum(abs.(qDy)))/2.1
             dt                        = min(dt_diff,dt_adv)
-            qTx[2:end-1,:]           .= (θ_dτ_T.*qTx[2:end-1,:].- λ_ρCp.*diff(T, dims = 1)) ./ (1+θ_dτ_T)
-            qTy                      .= (θ_dτ_T.*qTy .- λ_ρCp.*diff(T, dims = 2)) ./ (1+θ_dτ_T) 
+            qTx[2:end-1,:]           .= (θ_dτ_T.*qTx[2:end-1,:].- λ_ρCp.*diff(T, dims = 1) ./dx) ./ (1+θ_dτ_T)
+            qTy                      .= (θ_dτ_T.*qTy .- λ_ρCp.*diff(T, dims = 2) ./dy) ./ (1+θ_dτ_T) 
             dT_dt                    .= (T[2:end-1, 2:end-1] .- T_old[2:end-1,2:end-1]) ./dt
             dT_dt                   .+= max.(qDx[2:end-2, 2:end-1],0.0) .* diff(T[1:end-1, 2:end-1], dims = 1)./dx ./ ϕ
             dT_dt                   .+= min.(qDx[3:end-1, 2:end-1],0.0) .* diff(T[2:end, 2:end-1], dims = 1)./dx ./ ϕ
