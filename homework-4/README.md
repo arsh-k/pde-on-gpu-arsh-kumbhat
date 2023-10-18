@@ -28,7 +28,7 @@ For `Ra = 40`, the Gaussian peak has greater motion in the y-direction as compar
 
 ![Figure 4](./docs/porous_convection_2D_implicit_Ra_40.gif)
 
-For `Ra = 100`, there is definitive movement of the Gaussian peak in the y-direction indicating initiation of convection, however the peak does not manage to reach the boundary and diffuses completely before it can 
+For `Ra = 100`, there is definitive movement of the Gaussian peak in the y-direction indicating initiation of convection, however the peak does not manage to reach the boundary and diffuses completely before it can reach the boundary.
 
 ![Figure 5](./docs/porous_convection_2D_implicit_Ra_100.gif)
 
