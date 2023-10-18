@@ -39,7 +39,7 @@ For `Ra = 1000`, there is greater movement of the Gaussian peak in the y-directi
 From the above figures, it can be clearly seen that convection takes place for `Ra > 40` whereas there is no convection when `Ra < 40`. Also the greater the value of Ra, the greater is the convective thermal transport compared to diffusive thermal transport. This is in tandem with the definition of Rayleigh number which is stated as:
 
 $$
-Ra = \frac{Time scale for diffusive transport}{Time scale for thermal convective thermal transport}
+Ra = \frac{\text{Time scale for diffusive transport}}{\text{Time scale for thermal convective thermal transport}}
 $$
 
 The above formula also suggests that greater the Rayleigh number, the greater is the time taken for diffusive thermal transport is greater compared to convection.
