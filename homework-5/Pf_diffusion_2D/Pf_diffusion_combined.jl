@@ -208,7 +208,7 @@ nx_ = ny_               = 16 * 2 .^ (1:8)
 domain_size             = nx_ .* ny_
 max_bandwidth           = 37.5
 max_memory_throughput   = maximum([T_eff_init; T_eff_perf; T_eff_perf_loop; T_eff_perf_loop_fun])
-plot(domain_size, [T_eff_init, T_eff_perf, T_eff_perf_loop, T_eff_perf_loop_fun], xscale=:log10, title = "Memory Throughput (GB/s) Comparison",
+plot(domain_size, [T_eff_init, T_eff_perf, T_eff_perf_loop, T_eff_perf_loop_fun], xscale=:log10, title = "Memory Throughput (GB/s) Comparison - Diffusion",
         xlabel = "Domain Size", ylabel = "Memory Throughput (GB/s)", legend=:topright, linewidth = 2,
         label = ["Array Programming" "Array Prog (Inverse Multiplication)" "Kernel Programming" "Kernel Programming (4 Threads)"])
 hline!([max_bandwidth], label= "Maximum CPU Bandwidth",line=(:dot, 1), linewidth = 4, linecolor = "green")
