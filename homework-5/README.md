@@ -27,7 +27,7 @@ A key observation from the plot reveals that for a smaller domain size ($< 10^{5
 
 ##### Task 3
 
-The figure reported below compares the Peak Memory Throughput ($T_{peak}$) and the domain size for 4 separate implementations of a diffusion solver. It also indicates the maximum memory throughput achieved and the CPU maximum memory bandwidth. The BenchmarkTools package in Julia has been used to evaluate the memory throughputs.
+The figure reported below compares the Memory Throughput ($T_{eff}$) and the domain size for 4 separate implementations of a diffusion solver. It also indicates the maximum memory throughput achieved and the CPU maximum memory bandwidth. The BenchmarkTools package in Julia has been used to evaluate the memory throughputs.
 
 ![Figure 2](./docs/diffusion_ex_2_task_3.png)
 
