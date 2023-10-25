@@ -21,7 +21,7 @@ The figure reported below represents the variation of the CPU's maximum memory t
 
 The performed test assesses the change in memory throughput as we vary the domain size. It also compares the two approaches that are implemented in iterative stencil-based solvers within Julia: array and kernel programming. The memory throughput is also compared with the vendor-announced peak memory bandwidth for the CPU.
 
-The results of the test are in tandem with the theoretical hypothesis. The hypothesis is that kernel programming usually has a higher memory throughput in comparison to the array programming for Julia programs. Apart from minor deviations, we can observe that by both approaches to evaluating the memory throughput (i.e., using manual implementatation and the BenchmarkTools package), the kernel programming approach achieves a greater memory throughput compared to array programming.
+ Apart from minor deviations, we can observe that by both approaches to evaluating the memory throughput (i.e., using manual implementatation and the BenchmarkTools package), the kernel programming approach achieves a similar memory throughput compared to array programming. However, a thorough analysis is required and we implement that in task 3 for diffusion solvers which have greater memory accesses per iteration.
 
 A key observation from the plot reveals that for a smaller domain size ($< 10^{5}$ grid points), the memory throughput is greater than the vendor-announced peak CPU memory bandwidth. This is because for smaller domain sizes, the grid is small enough to fit within the cache memory and data is fetched by our program from the cache memory resulting in a higher memory throughput. However, larger domain sizes do not fit in the cache memory and require to be accessed from the main memory resulting in a lower memory throughput.
 
@@ -33,7 +33,7 @@ The figure reported below compares the Peak Memory Throughput ($T_{peak}$) and t
 
 The performed test assesses which solver has better memory throughput by comparing two versions of array programming and two versions of kernel programming via a domain size vs memory throughput plot.  
 
-In comparison to task 3, which only has 3 memory accesses per iteration whereas the diffusion solvers have 10 memory accesses per iteration, we can observe greater difference in the memory throughputs of the kernel programming solvers compared to the array programming solvers. The array programming solvers have a memory throughput of less than 10 GB/s for all domain sizes. The kernel programming solvers have a greater memory throughput for all domain sizes in comparison to the array programming solvers.
+In comparison to task 3, which only has 3 memory accesses per iteration whereas the diffusion solvers have 10 memory accesses per iteration, we can observe greater difference in the memory throughputs of the kernel programming solvers compared to the array programming solvers. The array programming solvers have a memory throughput of less than 10 GB/s for all domain sizes. The kernel programming solvers have a greater memory throughput for all domain sizes in comparison to the array programming solvers. The results of the test are in tandem with the theoretical hypothesis which states that kernel programming usually has a higher memory throughput in comparison to array programming for Julia programs.
 
 ### Exercise 3
 ```
