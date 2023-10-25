@@ -17,7 +17,7 @@ The following scripts have been completed and submitted in the `Pf_diffusion_2D`
 
 The figure reported below represents the variation of the CPU's maximum memory throughput ($T_{peak}$) with respect to the domain size for Kernel vs Array Programming (using BenchmarkTools). It also indicated the CPU's maximum bandwidth (provided by the vendor) as well as the maximum values for the memory throughput if we evaluate it via a manual implementation. Note that the number of threads considered for the kernel programming approach is 4 (since it was equal to the number of cores on my CPU). Also, the function under consideration computes the sum of two arrays and assigns it to a third array (3 memory accesses).
 
-![Figure 1](./docs/memcopy_ex2_task_2.png)
+![Figure 1](./docs/memcopy_ex_2_task_2.png)
 
 The performed test assesses the change in memory throughput as we vary the domain size. It also compares the two approaches that are implemented in iterative stencil-based solvers within Julia: array and kernel programming. The memory throughput is also compared with the vendor-announced peak memory bandwidth for the CPU.
 
