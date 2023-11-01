@@ -19,7 +19,7 @@ The $T_{\text{peak}}$ that is observed in the Task 4 graph is obtained from the 
 
 ##### Task 4
 
-![Figure 1](../docs/diffusion_ex_2_task_4.png)
+![Figure 1](./docs/diffusion_ex_2_task_4.png)
 
 The peak memory throughput value obtained in Task 3 is 551 GB/s which is very close to the peak theoretical value of the P100 GPU, i.e. 561 GB/s. The observed memory throughput increases with an increase in the domain size due to the greater amount of memory accessed over time. When we run the memory copy operation, we can achieve the peak memory throughput since only a single operation is run. But since multiple operations are run in our diffusion solver, our memory throughput never reaches the peak memory throughput.
 
