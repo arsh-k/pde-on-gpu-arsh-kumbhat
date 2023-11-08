@@ -10,7 +10,7 @@ function runtests()
     run(`$exename -O3 --startup-file=no $(joinpath(testdir, "test2D.jl"))`)
     run(`$exename -O3 --startup-file=no $(joinpath(testdir, "test3D.jl"))`)
 
-    return 1
+    return 0
 end
 
 exit(runtests())
