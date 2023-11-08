@@ -8,7 +8,7 @@
 
 ## Porous Convection 3D
 
-![Figure 2](./docs/porous_convection_3D_xpu_final.png)
+![Figure 2](./docs/T_3D.png)
 ![Figure 3](./docs/T_3D_slice_final.png)
 
 
