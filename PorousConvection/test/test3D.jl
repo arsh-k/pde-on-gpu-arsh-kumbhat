@@ -1,6 +1,8 @@
 include("../scripts/PorousConvection_3D_xpu.jl")
 
-T_final_3D = porous_convection_3D(;20, 20, 20, 25, true)
+testing  = true
+do_check = true
+T_final_3D = porous_convection_3D(;do_check, testing)
 
 # Unit Test
 @testset "Average Function Tests - 3D" begin

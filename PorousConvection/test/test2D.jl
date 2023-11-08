@@ -1,6 +1,8 @@
 include("../scripts/PorousConvection_2D_xpu.jl")
 
-T_final_2D = porous_convection_2D(;20, 20, 50, true)
+testing  = true
+do_check = true
+T_final_2D = porous_convection_2D(;do_check, testing)
 
 # Unit Test
 @testset "Average Function Tests - 2D" begin

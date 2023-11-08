@@ -99,7 +99,7 @@ end
     return nothing
 end
 
-@views function porous_convection_3D(;nx_ = 127, ny_ = 63, nz_ = 63, nt_ = 500, do_check = false)
+@views function porous_convection_3D(;do_check = false, testing = false)
     # physics
     lx, ly, lz = 40.0, 20.0, 20.0
     k_ηf       = 1.0
@@ -111,13 +111,15 @@ end
     Ra         = 1000
     λ_ρCp      = 1 / Ra * (αρg * k_ηf * ΔT * ly / ϕ) # Ra = αρg*k_ηf*ΔT*ly/λ_ρCp/ϕ
     # numerics
-    # nz         = 63
-    # ny         = nz
-    # nx         = 2 * (nz + 1) - 1
-    # nx, ny, nz = 255, 127, 127
-    # nt         = 2000
-    nx, ny, nz = nx_, ny_, nz_
-    nt         = nt_
+    if testing 
+        nz         = 20
+        ny         = nz
+        nx         = 2 * (nz + 1) - 1
+        nt         = 20
+    else 
+        nx, ny, nz = 255, 127, 127
+        nt         = 2000
+    end
     re_D       = 4π
     cfl        = 1.0 / sqrt(3.1)
     maxiter    = 10max(nx, ny, nz)
@@ -210,7 +212,8 @@ end
 
 if isinteractive()
     do_check = true
-    T = porous_convection_3D(;do_check)
+    testing  = false
+    T = porous_convection_3D(;do_check, testing)
 end
 
 
