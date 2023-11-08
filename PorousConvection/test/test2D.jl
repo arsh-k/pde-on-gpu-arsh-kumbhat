@@ -1,4 +1,6 @@
 include("../scripts/PorousConvection_2D_xpu.jl")
+using Test
+using PorousConvection
 
 testing  = true
 do_check = true

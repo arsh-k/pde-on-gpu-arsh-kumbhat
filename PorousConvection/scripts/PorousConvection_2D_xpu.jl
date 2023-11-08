@@ -176,7 +176,7 @@ end
         qDx_p = qDx_c[1:st:end, 1:st:end]
         qDy_p = qDy_c[1:st:end, 1:st:end]
         if testing == false
-            heatmap(xc, yc, Array(T)'; xlims=(xc[1], xc[end]), ylims=(yc[1], yc[end]), aspect_ratio=1, c=:turbo, size=(1200, 1200))
+            heatmap(xc, yc, Array(T)'; xlims=(xc[1], xc[end]), ylims=(yc[1], yc[end]), aspect_ratio=1, c=:turbo)
             quiver!(Xp[:], Yp[:]; quiver=(qDx_p[:], qDy_p[:]), lw=0.5, c=:black)
         end
     # end every nvis
