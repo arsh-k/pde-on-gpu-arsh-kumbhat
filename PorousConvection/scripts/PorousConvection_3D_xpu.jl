@@ -201,12 +201,13 @@ end
         # iframe = 0
         # end
     end 
-    p1 = heatmap(xc, zc, Array(T)[:, ceil(Int, ny / 2), :]'; xlims=(xc[1], xc[end]), ylims=(zc[1], zc[end]), aspect_ratio=1, c=:turbo)
-    display(p1)
-    savefig("./docs/T_3D_final.png")
-    # gif(anim, "./docs/porous_convection_3D_xpu_test.gif"; fps = 10)
-    # Simulation Results
-    save_array("./docs/out_T", convert.(Float32, Array(T)))
+    if testing == false
+        p1 = heatmap(xc, zc, Array(T)[:, ceil(Int, ny / 2), :]'; xlims=(xc[1], xc[end]), ylims=(zc[1], zc[end]), aspect_ratio=1, c=:turbo)
+        display(p1)
+        savefig("./docs/T_3D_final.png")
+        # Simulation Results
+        save_array("./docs/out_T", convert.(Float32, Array(T)))
+    end
     return T
 end
 

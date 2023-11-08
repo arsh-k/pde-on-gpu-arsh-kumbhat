@@ -130,8 +130,9 @@ end
     st     = ceil(Int, nx / 25)
     Xc, Yc = [x for x in xc, y in yc], [y for x in xc, y in yc]
     Xp, Yp = Xc[1:st:end, 1:st:end], Yc[1:st:end, 1:st:end]
-    # action
-    anim = @animate for it in 1:nt
+    # action (animation is not added for testing)
+    # anim = @animate for it in 1:nt
+    for it in 1:nt
         T_old .= T
         # time step
         dt = if it == 1
@@ -174,11 +175,13 @@ end
         qDy_c ./= qDmag
         qDx_p = qDx_c[1:st:end, 1:st:end]
         qDy_p = qDy_c[1:st:end, 1:st:end]
-        heatmap(xc, yc, Array(T)'; xlims=(xc[1], xc[end]), ylims=(yc[1], yc[end]), aspect_ratio=1, c=:turbo, size=(1200, 1200))
-        quiver!(Xp[:], Yp[:]; quiver=(qDx_p[:], qDy_p[:]), lw=0.5, c=:black)
-        # end
-    end every nvis
-    gif(anim, "./docs/porous_convection_2D_xpu_final.gif"; fps = 10)
+        if testing == false
+            heatmap(xc, yc, Array(T)'; xlims=(xc[1], xc[end]), ylims=(yc[1], yc[end]), aspect_ratio=1, c=:turbo, size=(1200, 1200))
+            quiver!(Xp[:], Yp[:]; quiver=(qDx_p[:], qDy_p[:]), lw=0.5, c=:black)
+        end
+    # end every nvis
+    end
+    # gif(anim, "./docs/porous_convection_2D_xpu_final.gif"; fps = 10)
     return T
 end
 
