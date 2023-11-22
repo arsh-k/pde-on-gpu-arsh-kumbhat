@@ -11,5 +11,8 @@
 ![Figure 2](./docs/T_3D.png)
 ![Figure 3](./docs/T_3D_slice_final.png)
 
+## Porous Convection 3D MPI
 
+![Figure 4](./docs/T_3D_slice_mpi_final.png)
+![Figure 5]()
 
