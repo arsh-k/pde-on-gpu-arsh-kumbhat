@@ -1,9 +1,15 @@
 # using Printf, LazyArrays, Plots
-using Printf, Plots
+using ImplicitGlobalGrid
+import MPI
+
+max_g(A) = (max_l = maximum(A); MPI.Allreduce(max_l, MPI.MAX, MPI.COMM_WORLD))
+
+using Printf, Plots, Plots.Measures
+default(size=(800, 500), framestyle=:box, label=false, grid=false, margin=5mm, lw=6, labelfontsize=11, tickfontsize=11, titlefontsize=11)
 using CUDA
 using ParallelStencil
 using ParallelStencil.FiniteDifferences3D
-const USE_GPU = false
+const USE_GPU = true
 @static if USE_GPU
     @init_parallel_stencil(CUDA, Float64, 3, inbounds=true)
 else
@@ -207,7 +213,7 @@ end
 
 Peforms a porous convection simulation on a 3-dimensional staggered grid. The keyword arguments `do_check` and  `testing` are by default set to `false`.
 """
-@views function porous_convection_3D(;do_check = false, testing = false)
+@views function porous_convection_3D(;do_check = false, testing = false, do_viz = false)
     # physics
     lx, ly, lz = 40.0, 20.0, 20.0
     k_ηf       = 1.0
@@ -220,22 +226,25 @@ Peforms a porous convection simulation on a 3-dimensional staggered grid. The ke
     λ_ρCp      = 1 / Ra * (αρg * k_ηf * ΔT * ly / ϕ) # Ra = αρg*k_ηf*ΔT*ly/λ_ρCp/ϕ
     # numerics
     if testing 
-        nz         = 20
-        ny         = nz
-        nx         = 2 * (nz + 1) - 1
-        nt         = 20
+        nz          = 20
+        ny          = nz
+        nx          = 2 * (nz + 1) - 1
+        nt          = 20
     else 
-        nx, ny, nz = 255, 127, 127
-        nt         = 2000
+        nz          = 127
+        nx,ny       = 2 * (nz + 1) - 1, nz
+        me, dims    = init_global_grid(nx, ny, nz)  # init global grid and more
+        b_width     = (8, 8, 4)                     # for comm / comp overlap
+        nt          = 2000
     end
     re_D       = 4π
     cfl        = 1.0 / sqrt(3.1)
-    maxiter    = 10max(nx, ny, nz)
+    maxiter    = 10max(nx_g(), ny_g(), nz_g())
     ϵtol       = 1e-6
-    nvis       = 50
-    ncheck     = ceil(2max(nx, ny, nz))
+    nvis       = 100
+    ncheck     = ceil(2max(nx_g(), ny_g(), nz_g()))
     # preprocessing
-    dx, dy, dz = lx / nx, ly / ny, lz / nz 
+    dx, dy, dz = lx / nx_g(), ly / ny_g(), lz / nz_g() 
     xn, yn, zn = LinRange(-lx / 2, lx / 2, nx + 1), LinRange(-ly / 2, ly/ 2, ny + 1), LinRange(-lz, 0, nz + 1)
     xc, yc, zc = av1(xn), av1(yn), av1(zn)
     θ_dτ_D     = max(lx, ly, lz) / re_D / cfl / min(dx, dy, dz)
@@ -246,9 +255,14 @@ Peforms a porous convection simulation on a 3-dimensional staggered grid. The ke
     qDx, qDy, qDz= @zeros(nx + 1, ny, nz), @zeros(nx, ny + 1, nz), @zeros(nx, ny, nz + 1)
     qDx_c, qDy_c, qDz_c = zeros(nx, ny, nz), zeros(nx, ny, nz), zeros(nx, ny, nz)
     qDmag        = zeros(nx, ny, nz)
-    T            = Data.Array([ΔT * exp(-xc[ix]^2 - yc[iy]^2 - (zc[iz] + lz / 2)^2) for ix = 1:nx, iy = 1:ny, iz = 1:nz])
-    T[:, :, 1]  .= ΔT / 2
+    T  = @zeros(nx, ny, nz)
+    T .= Data.Array([ΔT * exp(-(x_g(ix, dx, T) + dx / 2 - lx / 2)^2
+                              -(y_g(iy, dy, T) + dy / 2 - ly / 2)^2
+                              -(z_g(iz, dz, T) + dz / 2 - lz / 2)^2) for ix = 1:size(T, 1), iy = 1:size(T, 2), iz = 1:size(T, 3)])    
+                              
+    T[:, :, 1]  .=  ΔT / 2
     T[:, :, end].= -ΔT / 2
+    update_halo!(T)
     T_old        = Data.Array(copy(T))
     dTdt         = @zeros(nx - 2, ny - 2, nz - 2)
     r_T          = @zeros(nx - 2, ny - 2, nz - 2)
@@ -259,6 +273,17 @@ Peforms a porous convection simulation on a 3-dimensional staggered grid. The ke
     st          = ceil(Int, nx / 25)
     Xc, Yc, Zc  = [x for x in xc, y in yc, z in zc], [y for x in xc, y in yc, z in zc], [z for x in xc, y in yc, z in zc]
     Xp, Yp, Zp  = Xc[1:st:end, 1:st:end, 1:st:end], Yc[1:st:end, 1:st:end, 1:st:end], Zc[1:st:end, 1:st:end, 1:st:end]
+    # Visualization
+    if do_viz
+        ENV["GKSwstype"]="nul"
+        if (me==0) if isdir("viz3Dmpi_out_final")==false mkdir("viz3Dmpi_out_final") end; loadpath="viz3Dmpi_out_final/"; anim=Animation(loadpath,String[]); println("Animation directory: $(anim.dir)") end
+        nx_v, ny_v, nz_v = (nx - 2) * dims[1], (ny - 2) * dims[2], (nz - 2) * dims[3]
+        (nx_v * ny_v * nz_v * sizeof(Data.Number) > 0.8 * Sys.free_memory()) && error("Not enough memory for visualization.")
+        T_v   = zeros(nx_v, ny_v, nz_v) # global array for visu
+        T_inn = zeros(nx - 2, ny - 2, nz - 2) # no halo local array for visu
+        xi_g, zi_g = LinRange(-lx / 2 + dx + dx / 2, lx / 2 - dx - dx / 2, nx_v), LinRange(-lz + dz + dz / 2, -dz - dz / 2, nz_v) # inner points only
+        iframe = 0
+    end
     # action
     for it in 1:nt
         T_old .= T
@@ -266,7 +291,7 @@ Peforms a porous convection simulation on a 3-dimensional staggered grid. The ke
         dt = if it == 1
             0.1 * min(dx, dy, dz) / (αρg * ΔT * k_ηf)
         else
-            min(5.0 * min(dx, dy, dz) / (αρg * ΔT * k_ηf), ϕ * min(dx / maximum(abs.(qDx)), dy / maximum(abs.(qDy)), dz / maximum(abs.(qDz))) / 3.1)
+            min(5.0 * min(dx, dy, dz) / (αρg * ΔT * k_ηf), ϕ * min(dx / max_g(abs.(qDx)), dy / max_g(abs.(qDy)), dz / max_g(abs.(qDz))) / 3.1)
         end
         re_T   = π + sqrt(π^2 + ly^2 / λ_ρCp / dt)
         θ_dτ_T = max(lx, ly, lz) / re_T / cfl / min(dx, dy, dz)
@@ -277,52 +302,50 @@ Peforms a porous convection simulation on a 3-dimensional staggered grid. The ke
         err_T = 2ϵtol
         while max(err_D, err_T) >= ϵtol && iter <= maxiter
             # hydro
-            @parallel compute_diffusion_flux!(qDx, qDy, qDz, Pf, θ_dτ_D, k_ηf, dx, dy, dz, αρg, T)
+            @hide_communication b_width begin
+                @parallel compute_diffusion_flux!(qDx, qDy, qDz, Pf, θ_dτ_D, k_ηf, dx, dy, dz, αρg, T)
+                update_halo!(qDx, qDy, qDz)
+            end
             @parallel compute_Pf!(Pf, qDx, qDy, qDz, dx, dy, dz, β_dτ_D)
             # thermo
             @parallel compute_thermal_flux!(qTx, qTy, qTz, λ_ρCp, T, dx, dy, dz, θ_dτ_T) 
             @parallel compute_dTdt!(dTdt, T, T_old, dt, qDx, qDy, qDz, dx, dy, dz, ϕ)
-            @parallel computeT!(T, dTdt, qTx, qTy, qTz, dx, dy, dz, dt, β_dτ_T)
-            @parallel (1:size(T,2), 1:size(T,3)) bc_yz!(T)
-            @parallel (1:size(T,1), 1:size(T,3)) bc_xz!(T)
-            if iter % ncheck == 0 && do_check 
+            @hide_communication b_width begin
+                @parallel computeT!(T, dTdt, qTx, qTy, qTz, dx, dy, dz, dt, β_dτ_T)
+                @parallel (1:size(T,2), 1:size(T,3)) bc_yz!(T)
+                @parallel (1:size(T,1), 1:size(T,3)) bc_xz!(T)
+                update_halo!(T)
+            end
+            if (iter % ncheck == 0) && do_check 
                 @parallel compute_r_Pf!(r_Pf, qDx, qDy, qDz, dx, dy, dz)
                 @parallel compute_r_T!(r_T, dTdt, qTx, qTy, qTz, dx, dy, dz)
-                err_D = maximum(abs.(r_Pf))
-                err_T = maximum(abs.(r_T))
-                @printf("  iter/nx=%.1f, err_D=%1.3e, err_T=%1.3e\n", iter / nx, err_D, err_T)
+                err_D = max_g(abs.(r_Pf))
+                err_T = max_g(abs.(r_T))
+                if (me == 0) @printf("  iter/nx=%.1f, err_D=%1.3e, err_T=%1.3e\n", iter / nx_g(), err_D, err_T) end
             end
-            iter += 1
+            iter += 1        
         end
-        @printf("it = %d, iter/nx=%.1f, err_D=%1.3e, err_T=%1.3e\n", it, iter / nx, err_D, err_T)
+        if (me == 0) @printf("it = %d, iter/nx=%.1f, err_D=%1.3e, err_T=%1.3e\n", it, iter / nx_g(), err_D, err_T) end
         # visualisation
-        # if it % nvis == 0
-        qDx_c .= avx(Array(qDx))
-        qDy_c .= avy(Array(qDy))
-        qDz_c .= avz(Array(qDz))
-        qDmag .= sqrt.(qDx_c .^ 2 .+ qDy_c .^ 2 .+ qDz_c .^ 2)
-        qDx_c ./= qDmag
-        qDy_c ./= qDmag
-        qDz_c ./= qDmag
-        # qDx_p = qDx_c[1:st:end, 1:st:end,]
-        # qDy_p = qDy_c[1:st:end, 1:st:end]
-        # iframe = 0
-        # end
-    end 
-    if testing == false
-        p1 = heatmap(xc, zc, Array(T)[:, ceil(Int, ny / 2), :]'; xlims=(xc[1], xc[end]), ylims=(zc[1], zc[end]), aspect_ratio=1, c=:turbo)
-        display(p1)
-        savefig("./docs/T_3D_final.png")
-        # Simulation Results
-        save_array("./docs/out_T", convert.(Float32, Array(T)))
+        if do_viz && (it % nvis == 0) 
+            T_inn .= Array(T)[2:end-1, 2:end-1, 2:end-1]; gather!(T_inn, T_v)
+            if (me == 0)
+                p1 = heatmap(xi_g, zi_g, T_v[:, ceil(Int, ny_g() / 2), :]'; xlims=(xi_g[1], xi_g[end]), ylims=(zi_g[1], zi_g[end]), aspect_ratio=1, c=:turbo)
+                # display(p1)
+                png(p1, @sprintf("./viz3Dmpi_out_final/%04d.png", iframe += 1))
+                save_array(@sprintf("./data_final/out_T_%04d", iframe), convert.(Float32, T_v))
+            end
+        end
     end
-    return T
+    finalize_global_grid()
+    return 
 end
 
-if isinteractive()
-    do_check = true
-    testing  = false
-    T = porous_convection_3D(;do_check, testing)
-end
+# if isinteractive()
+do_check = true
+testing  = false
+do_viz   = true
+porous_convection_3D(;do_check, testing, do_viz)
+# end
 
 
