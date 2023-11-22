@@ -51,16 +51,16 @@ Multi-GPU Implementation Test |    4      4  0.0s
 ```
 
 ##### Task 4
-The figure below indicates the memory throughput $T_{\text{eff}}$ as a function of the number of cells in the x-direction (or, y-direction in our simulation) on a single GPU. This is done in order to identify the `nx` and `ny` that have the highest memory throughput on a single-GPU (i.e. the largest local problem possible on a single-GPU without compromising the performance of a single GPU) so that we can scale the problem to multiple GPUs. It is observed that the Memory Throughput increases as we increase the domain size from  `nx = ny = 32` to `nx = ny = 16384` and the highest memory throughput is for the latter.
+The figure below indicates the memory throughput $T_{\text{eff}}$ as a function of the number of cells in the x-direction (or, y-direction in our simulation) on a single GPU. This is done in order to identify the `nx` and `ny` that have the highest memory throughput on a single-GPU (i.e. the largest local problem possible on a single-GPU without compromising the performance of a single GPU) so that we can scale the problem to multiple GPUs. It is observed that the Memory Throughput increases as we increase the domain size from  `nx = ny = 32` to `nx = ny = 16384` and the highest memory throughput achieved is for the latter.
 
 ![Figure 6](./docs/strong_scaling.png)
 
 ##### Task 5
-The figure below indicates the speed-up as a function of the number of processes. It is observed that the speed-up increases with the number of processes (with a minor deviation at 16 processes). This indicates an advantage of using weak-scaling of single-GPUs to multiple-GPUs for massive global problems. For weak scaling, I have picked `nx = ny = 8192` because my batch script used to time-out without compiling completely. The batch script is provided in `weak_scale_sbatch_mpi_daint.sh` in the `src` folder.
+The figure below indicates the normalized execution time as a function of the number of processes. It is observed that even as the global domain size increases as the number of processes increase there is a minor increase in execution time compared to the single process. This indicates an advantage of using weak-scaling of single-GPUs to multiple-GPUs for massive global problems. The minor increase in execution time is due to communication between the multiple GPU nodes via `update_halo!`. For weak scaling, I have picked `nx = ny = 16384` since it had the highest Effect Memory Throughput for the local domain sizes in Task 4. The batch script is provided in `weak_scale_sbatch_mpi_daint.sh` in the `src` folder.
 
 ![Figure 7](./docs/weak_scaling.png)
 
 ##### Task 6
-The figure below indicates a comparison between the speed-up with change in the `@hide_communication` macro parameters. It is observed that for certain values of the parameters such as `(8,2)` and `(16, 16)` there is a speed-up in comparison to not using the `@hide_communication` macro. The value of these parameters is obtained by observing the maximum value of speed-up. 
+The figure below indicates a comparison between the normalized execution time with change in the `@hide_communication` macro parameters. It is observed that for certain values of the parameters such as `(8,2)` and `(16, 16)` there is a reduced execution time in comparison to not using the `@hide_communication` macro. The value of these parameters is obtained by observing the minimum value of the execution time.
 
 ![Figure 8](./docs/hide_communication.png) 
