@@ -10,21 +10,94 @@ else
     @init_parallel_stencil(Threads, Float64, 3, inbounds=true)
 end
 
+# CPU Array Functions
+
+"""
+    av1(A)
+
+Returns an array computed by averaging the array `A` in all dimensions (applicable to n-dimension arrays).
+
+#Example
+```jldoctest
+julia> av1([10,20,30])
+2-element Vector{Float64}:
+ 15.0
+ 25.0
+```
+"""
 @views av1(A) = 0.5 .* (A[1:end-1] .+ A[2:end])
+
+"""
+    avx(A)
+
+Returns an array computed by averaging the array `A` in the first dimension (applicable to 3-dimension arrays).
+
+#Example
+```jldoctest
+julia> avx([[10 20; 30 40];;;[50 60; 70 80]])
+1×2×2 Array{Float64, 3}:
+[:, :, 1] =
+ 20.0  30.0
+
+[:, :, 2] =
+ 60.0  70.0
+```
+"""
 @views avx(A) = 0.5 .* (A[1:end-1, :, :] .+ A[2:end, :, :])
+
+"""
+    avy(A)
+
+Returns an array computed by averaging the array `A` in the second dimension (applicable to 3-dimension arrays).
+
+#Example
+```jldoctest
+julia> avy([[10 20; 30 40];;;[50 60; 70 80]])
+2×1×2 Array{Float64, 3}:
+[:, :, 1] =
+ 15.0
+ 35.0
+
+[:, :, 2] =
+ 55.0
+ 75.0
+```
+"""
 @views avy(A) = 0.5 .* (A[:, 1:end-1, :] .+ A[:, 2:end, :])
+
+"""
+    avz(A)
+
+Returns an array computed by averaging the array `A` in the third dimension (applicable to 3-dimension arrays).
+
+#Example
+```jldoctest
+julia> avz([[10 20; 30 40];;;[50 60; 70 80]])
+2×2×1 Array{Float64, 3}:
+[:, :, 1] =
+ 30.0  40.0
+ 50.0  60.0
+```
+"""
 @views avz(A) = 0.5 .* (A[:, :, 1:end-1] .+ A[:, :, 2:end])
 
-# macro d_x(A) esc(:($A[ix+1, iy] - $A[ix, iy])) end
-# macro d_y(A) esc(:($A[ix, iy+1] - $A[ix, iy])) end
-
 # Visualizaiton function
+"""
+    save_array(file_name, array)
+
+Saves an array variable `array` to the file titled `file_name`.
+"""
 function save_array(Aname,A)
     fname = string(Aname, ".bin")
     out = open(fname, "w"); write(out, A); close(out)
 end
 
 # Hydro functions
+"""
+    compute_diffusion_flux!(qDx, qDy, qDz, Pf, θ_dτ_D, k_ηf, dx, dy, dz, αρg, T)
+
+Computes the diffusive flux within a 3-dimensional staggered grid.
+"""
 @parallel function compute_diffusion_flux!(qDx, qDy, qDz, Pf, θ_dτ_D, k_ηf, dx, dy, dz, αρg, T)
     @inn_x(qDx) =  @inn_x(qDx) - (@inn_x(qDx) + k_ηf * (@d_xa(Pf) / dx)) / (1.0 + θ_dτ_D)
     @inn_y(qDy) =  @inn_y(qDy) - (@inn_y(qDy) + k_ηf * (@d_ya(Pf) / dy)) / (1.0 + θ_dτ_D)
@@ -32,29 +105,34 @@ end
     return nothing
 end
 
+"""
+    compute_Pf!(Pf, qDx, qDy, qDz, dx, dy, dz, β_dτ_D)
+
+Computes the pressure field of a 3-dimensional staggered grid.
+"""
 @parallel function compute_Pf!(Pf, qDx, qDy, qDz, dx, dy, dz, β_dτ_D)
     @all(Pf)    =  @all(Pf) - (@d_xa(qDx) / dx + @d_ya(qDy) / dy + @d_za(qDz) / dz) / β_dτ_D
     return nothing
 end
 
 # Thermo functions
+"""
+    compute_thermal_flux!(qTx, qTy, qTz, λ_ρCp, T, dx, dy, dz, θ_dτ_T) 
+
+Computes the heat flux within a 3-dimensional staggered grid.
+"""
 @parallel function compute_thermal_flux!(qTx, qTy, qTz, λ_ρCp, T, dx, dy, dz, θ_dτ_T)
     @all(qTx) = @all(qTx) - (@all(qTx) + λ_ρCp * (@d_xi(T) / dx)) / (1.0 + θ_dτ_T)
     @all(qTy) = @all(qTy) - (@all(qTy) + λ_ρCp * (@d_yi(T) / dy)) / (1.0 + θ_dτ_T)
     @all(qTz) = @all(qTz) - (@all(qTz) + λ_ρCp * (@d_zi(T) / dz)) / (1.0 + θ_dτ_T)
     return nothing
 end
-# @parallel_indices (ix, iy) function compute_thermal_flux!(qTx, qTy, λ_ρCp, T, dx, dy, θ_dτ_T)
-#     nx, ny = size(T)
-#     if (ix <= (nx-1) && iy <= (ny-2)) 
-#         qTx[ix, iy] -= (qTx[ix, iy] + λ_ρCp * (@d_x(T[ix, iy + 1]) / dx)) / (1.0 + θ_dτ_T)
-#     end
-#     if (ix <= (nx-2) && iy <= (ny-1))
-#         qTy[ix, iy] -= (qTy[ix, iy] + λ_ρCp * (@d_y(T[ix + 1, iy]) / dy)) / (1.0 + θ_dτ_T)
-#     end
-#     return nothing
-# end
 
+"""
+    compute_dTdt!(dTdt, T, T_old, dt, qDx, qDy, qDz, dx, dy, dz, ϕ)
+
+Computes the derivative of temperature with respect to the physical temporal variable within a 3-dimensional staggered grid.
+"""
 @parallel_indices (ix, iy, iz) function compute_dTdt!(dTdt, T, T_old, dt, qDx, qDy, qDz, dx, dy, dz, ϕ)
     nx, ny, nz = size(dTdt)
     # T, T_old - (nx, ny); qDx - (nx+1, ny); qDy - (nx, ny+1); dTdt - (nx - 2, ny - 2)
@@ -70,18 +148,33 @@ end
     return nothing
 end
 
+"""
+    computeT!(T, dTdt, qTx, qTy, qTz, dx, dy, dz, dt, β_dτ_T)
+
+Computes the temperature field for a 3-dimensional staggered grid.
+"""
 @parallel function computeT!(T, dTdt, qTx, qTy, qTz, dx, dy, dz, dt, β_dτ_T)
     @inn(T) = @inn(T) - (@all(dTdt) + @d_xa(qTx) / dx + @d_ya(qTy) / dy + @d_za(qTz) / dz) / (1.0 / dt + β_dτ_T)
     return nothing
 end
 
 # Temperature Boundary conditions
+"""
+    bc_yz!(T)
+
+Sets the temperature boundary condition on the YZ plane.
+"""
 @parallel_indices (iy, iz) function bc_yz!(T)
     T[1  , iy, iz] = T[2    , iy, iz]
     T[end, iy, iz] = T[end-1, iy, iz]
     return
 end
 
+"""
+    bc_xz!(T)
+
+Sets the temperature boundary condition on the XZ plane.
+"""
 @parallel_indices (ix, iz) function bc_xz!(T)
     T[ix  , 1, iz] = T[ix    , 2, iz]
     T[ix, end, iz] = T[ix, end-1, iz]    
@@ -89,16 +182,31 @@ end
 end
 
 # Error Check functions
+"""
+    compute_r_Pf!(r_Pf, qDx, qDy, qDz, dx, dy, dz)
+    
+Evaluates the pressure PDE residual. 
+"""
 @parallel function compute_r_Pf!(r_Pf, qDx, qDy, qDz, dx, dy, dz)
     @all(r_Pf) = @d_xa(qDx) / dx + @d_ya(qDy) / dy + @d_za(qDz) / dz
     return nothing
 end
 
+"""
+    compute_r_T!(r_T, dTdt, qTx, qTy, qTz, dx, dy, dz)  
+
+Evaluates the temperature PDE residual. 
+"""
 @parallel function compute_r_T!(r_T, dTdt, qTx, qTy, qTz, dx, dy, dz)
     @all(r_T)   = @all(dTdt) + @d_xa(qTx) / dx + @d_ya(qTy) / dy + @d_za(qTz) / dz
     return nothing
 end
 
+"""
+    porous_convection_3D(;do_check, testing)
+
+Peforms a porous convection simulation on a 3-dimensional staggered grid. The keyword arguments `do_check` and  `testing` are by default set to `false`.
+"""
 @views function porous_convection_3D(;do_check = false, testing = false)
     # physics
     lx, ly, lz = 40.0, 20.0, 20.0
