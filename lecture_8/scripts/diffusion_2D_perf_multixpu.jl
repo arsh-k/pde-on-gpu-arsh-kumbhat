@@ -32,36 +32,17 @@ end
     # Physics
     Lx, Ly = 10.0, 10.0
     D      = 1.0
-    if strong_scaling
-        if (nx <= 512)
-            ttot = 1
-        elseif (nx > 1024 && nx <= 4096)
-            ttot = 0.001
-        elseif nx > 4096
-            ttot = 1e-5
-        else
-            ttot = 0.2
-        end
-    elseif weak_scaling || hide_communication
-        ttot = 1e-5
-    else
-        ttot = 1e0
-    end
-    # Numerics
-    # nx, ny = 64, 64 # number of grid points
+    ttot = 1e0
     nout   = 20
-    # Condition
-    # if init_hide_comm 
-    #     println("NO HIDE COMMUNICATION") 
-    # else
-    #     println("HIDE COMMUNICATION")
-    #     println("$(hide_comm_1) & $(hide_comm_2)")
-    # end
     # Derived numerics
     me, dims = init_global_grid(nx, ny, 1; init_MPI=false)
     dx, dy   = Lx / nx_g(), Ly / ny_g()
     dt     = min(dx, dy)^2 / D / 4.1
-    nt     = cld(ttot, dt)
+    if weak_scaling || hide_communication
+        nt     = 200
+    else
+        nt     = 500
+    end
     xc, yc = LinRange(dx / 2, Lx - dx / 2, nx), LinRange(dy / 2, Ly - dy / 2, ny)
     D_dx   = D / dx
     D_dy   = D / dy
@@ -101,7 +82,7 @@ end
         end
         niter += 1
         # Visualize
-        if do_save
+        if do_save 
             C_save_inn .= Array(C)[2:end-1,2:end-1]; gather!(C_inn, C_v_save)
         end
         if do_visu  && (it % nout == 0)
@@ -138,15 +119,15 @@ if strong_scaling
         T_eff[i] = diffusion_2D(nx[i], ny[i]; do_visu=false, strong_scaling = strong_scaling)
     end
     plot(nx, T_eff, title = "Strong Scaling - Memory Throughput", xlabel = "nx", ylabel = "Memory Throughput (GB/s)", linewidth = 2, xscale=:log10)
-    savefig("./docs/strong_scaling.png")
+    savefig("./docs/strong_scaling_2.png")
 elseif weak_scaling 
-    nx = ny = 8192
+    nx = ny = 16384
     diffusion_2D(nx, ny; do_visu=false, weak_scaling = weak_scaling)
 elseif hide_communication
-    nx = ny         = 8192
+    nx = ny         = 16384
     init_hide_comm_ = true
     t_vector        = zeros(5)
-    norm_time       = 0.051
+    norm_time       = 1.756
     t_vector[1]     = diffusion_2D(nx, ny; do_visu=false, hide_communication = hide_communication, init_hide_comm = init_hide_comm_) / norm_time
     # t_vector[3] = 5.944 / norm_time;
     init_hide_comm_ = false
@@ -158,11 +139,11 @@ elseif hide_communication
         # t_vector[i] = t_vector[i] / norm_time
     end
     tex_hide_comm = ["no-hidecomm", "(2,2)", "(8,2)", "(16,4)", "(16,16)"]
-    plot(tex_hide_comm, t_vector, title = "Effect of Hide Communication", xlabel = "Hide communication parameters", ylabel = "Speed-up", linewidth = 2)
-    savefig("./docs/hide_communication.png")
+    plot(tex_hide_comm, t_vector, title = "Effect of Hide Communication", xlabel = "Hide communication parameters", ylabel = "Normalized Execution Time", linewidth = 2, ylims=(0.5,1.25))
+    savefig("./docs/hide_communication_2.png")
 else
-    nx = ny = 64
-    diffusion_2D(64, 64; do_visu=true, do_save)
+    nx = ny = 8192
+    diffusion_2D(nx, ny; do_visu=false, do_save = false)
 end
 
 MPI.Finalize()
