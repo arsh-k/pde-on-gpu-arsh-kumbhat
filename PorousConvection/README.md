@@ -36,6 +36,7 @@ $$
 
 ##### Heat Convection in Porous Media
 
+The following equation represents the energy conservation 
 
 $$
 \rho c_p \frac{\partial T}{\partial t}+\rho c_p \boldsymbol{v} \cdot \nabla T+\nabla \cdot \boldsymbol{q}_{\boldsymbol{F}}=0
