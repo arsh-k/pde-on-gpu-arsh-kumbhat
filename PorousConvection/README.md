@@ -36,15 +36,21 @@ $$
 
 ##### Heat Convection in Porous Media
 
-The following equation represents the energy conservation 
+The following equation represents the energy conservation equation for the fluid in porous media:
 
 $$
 \rho c_p \frac{\partial T}{\partial t}+\rho c_p \boldsymbol{v} \cdot \nabla T+\nabla \cdot \boldsymbol{q}_{\boldsymbol{F}}=0
 $$
 
+where $c_{p}$ is the specific heat capacity of the fluid, $\boldsymbol{q}_{\boldsymbol{F}}$ is the conductive heat flux and $t$ is the physical time.
+
+Analogous to Darcy's law, there exists the Fourier's law which relates the conductive heat flux to the temperature gradient:
+
 $$
 \boldsymbol{q}_{\boldsymbol{F}}=-\lambda \nabla T
 $$
+
+where $\lambda$ is the thermal conductivity (which is assumed constant in our simulation). By substituting the Darcy flux equation and the 
 
 $$
 $$

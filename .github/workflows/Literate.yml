@@ -30,6 +30,6 @@ jobs:
       - name: commit
         run: |
           # Stage the file, commit and push
-          git add ./scripts/md/*
+          git add .
           git commit -m "Commit markdown files fom Literate"
           git push origin master
