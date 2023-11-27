@@ -19,7 +19,7 @@ jobs:
       - uses: julia-actions/julia-buildpkg@latest
 
       - name: run Literate
-        run: QT_QPA_PLATFORM=offscreen julia --color=yes --project -e 'cd("PorousConvection"); import Pkg; Pkg.activate("."); Pkg.instantiate(); cd("scripts"); include("literate-script.jl")'
+        run: QT_QPA_PLATFORM=offscreen julia --color=yes --project -e 'cd("PorousConvection"); import Pkg; Pkg.activate("."); Pkg.instantiate(); cd("scripts"); mkdir("md"); include("literate-script.jl")'
 
       - name: setup git config
         run: |
