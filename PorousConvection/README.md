@@ -88,7 +88,10 @@ The numerical method used in our simulation is the pseudo-transient method. We c
 Inertial terms are added to the flux equations as follows:
 
 $$
-\begin{gathered} \theta_D \frac{\partial \boldsymbol{q}_{\boldsymbol{D}}}{\partial \tau}+\boldsymbol{q}_{\boldsymbol{D}}=-\frac{k}{\eta}\left(\nabla p-\rho_0 \alpha \boldsymbol{g} T\right) \\ \theta_T \frac{\partial \boldsymbol{q}_{\boldsymbol{T}}}{\partial \tau}+\boldsymbol{q}_{\boldsymbol{T}}=-\frac{\lambda}{\rho_0 c_p} \nabla T \end{gathered}\
+ \theta_D \frac{\partial \boldsymbol{q}_{\boldsymbol{D}}}{\partial \tau}+\boldsymbol{q}_{\boldsymbol{D}}=-\frac{k}{\eta}\left(\nabla p-\rho_0 \alpha \boldsymbol{g} T\right) 
+$$
+$$
+ \theta_T \frac{\partial \boldsymbol{q}_{\boldsymbol{T}}}{\partial \tau}+\boldsymbol{q}_{\boldsymbol{T}}=-\frac{\lambda}{\rho_0 c_p} \nabla T
 $$
 
 where $\theta_D$ and $\theta_T$ are the characteristic relaxation times for pressure and heat diffusion respectively.
@@ -96,7 +99,11 @@ where $\theta_D$ and $\theta_T$ are the characteristic relaxation times for pres
 To the mass balance and energy balance equations, we add the compressibility terms. Particularly for the energy balance equation, we use a dual-time method by discretizing the physical time derivative as shown below:
 
 $$
-\begin{gathered} \beta \frac{\partial p}{\partial \tau}+\nabla \cdot \boldsymbol{q}_{\boldsymbol{D}}=0 \\ \frac{\partial T}{\partial \tau}+\frac{T-T_{\text {old }}}{\mathrm{d} t}+\frac{1}{\phi} \boldsymbol{q}_D \cdot \nabla T+\nabla \cdot \boldsymbol{q}_T=0 \end{gathered}
+\beta \frac{\partial p}{\partial \tau}+\nabla \cdot \boldsymbol{q}_{\boldsymbol{D}}=0 
+$$
+
+$$
+\frac{\partial T}{\partial \tau}+\frac{T-T_{\text {old }}}{\mathrm{d} t}+\frac{1}{\phi} \boldsymbol{q}_D \cdot \nabla T+\nabla \cdot \boldsymbol{q}_T=0
 $$
 
 In the above equation, $\beta$ refers to the pseudo-compressibility and $T_{\text{old}}$ is the temperature profile of the domain in the previous physical time step.
@@ -107,24 +114,27 @@ The pseudo-transient method is quite a powerful tool as it allows for implicitly
 In this section, we develop a two-dimensional porous convection model having a domain size `nx, ny = 1023, 511` for `nt = 4000` iterations. The simulation can be performed on both GPUs and CPUs via a single code file titled `PorousConvection_2D_xpu.jl`.
 
 ![Figure 1](./docs/porous_convection_2D_xpu_final.gif)
-"Figure 1: Temperature distribution and two-dimensional porous convection model simulated on a single GPU"
+*Figure 1: Temperature distribution and two-dimensional porous convection model simulated on a single GPU*
 
 ## Section 2: Porous Convection 3D
 In this section, we develop a three-dimensional porous convection model having a domain size `nx, ny, nz = 255, 127, 127` for `nt = 2000` iterations. The simulation can be performed on both GPUs and CPUs via a single code file titled `PorousConvection_3D_xpu.jl`.
 
 ![Figure 2](./docs/T_3D_slice_final.png)
-"Figure 2: 2D slice of the final temperature distribution of a three-dimensional porous convection model simulated on a single GPU"
+*Figure 2: 2D slice of the final temperature distribution of a three-dimensional porous convection model simulated on a single GPU*
 ![Figure 3](./docs/T_3D.png)
-"Figure 3: Final temperature distribution of a three-dimensional porous convection model simulated on a single GPU"
+*Figure 3: Final temperature distribution of a three-dimensional porous convection model simulated on a single GPU*
 
 ## Section 3: Porous Convection 3D MPI
 In the section, we develop a multi-xPU configurated simulation for a three-dimensional porous convection model having a global domain size `nx, ny, nz = 508, 252, 252` for `nt = 2000` iterations. The simulation can be performed on multi-xPU configurations via the code file titled `PorousConvection_3D_multixpu.jl`.
 
 ![Figure 4](./docs/T_3D_slice_mpi_final.png)
-"Figure 4: 2D slice of the final temperature distribution of a three-dimensional porous convection model simulated on 8 GPUs"
+*Figure 4: 2D slice of the final temperature distribution of a three-dimensional porous convection model simulated on 8 GPUs*
 ![Figure 5](./docs/porous_convection_3D_multixpu.gif)
-"Figure 3: Temperature distribution of a three-dimensional porous convection model simulated on 8 GPUs"
+*Figure 5: Temperature distribution of a three-dimensional porous convection model simulated on 8 GPUs*
 
 ## Conclusion
+The simulations presented in the sections above are in tandem with the results expected from physics and this indicates that the combined use of 
+[ParallelStencil.jl](https://github.com/omlins/ParallelStencil.jl) and [ImplicitGlobalGrid.jl](https://github.com/eth-cscs/ImplicitGlobalGrid.jl) is truly a remarkable tool for solving physical processes governed by partial differential equations. 
+
 
 ## Bonus Section: Documentation 
