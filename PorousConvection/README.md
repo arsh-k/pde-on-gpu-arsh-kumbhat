@@ -99,13 +99,7 @@ The numerical method used in our simulation is the pseudo-transient method. We c
 
 Inertial terms are added to the flux equations as follows:
 
-$$
-\theta_D \frac{\partial \boldsymbol{q}_{\boldsymbol{D}}}{\partial \tau}+\boldsymbol{q}_{\boldsymbol{D}}=-\frac{k}{\eta}\left(\nabla p-\rho_0 \alpha \boldsymbol{g} T\right) 
-$$
-
-$$
-\theta_T \frac{\partial \boldsymbol{q}_{\boldsymbol{T}}}{\partial \tau}+\boldsymbol{q}_{\boldsymbol{T}}=-\frac{\lambda}{\rho_0 c_p} \nabla T
-$$
+![Pseudo Flux Equation](./docs/pseudo-equation-flux.png)
 
 where $\theta_D$ and $\theta_T$ are the characteristic relaxation times for pressure and heat diffusion respectively.
 
