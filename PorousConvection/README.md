@@ -54,7 +54,7 @@ $$
 \frac{\partial T}{\partial t}+\frac{1}{\phi} \boldsymbol{q}_D \cdot \nabla T-\frac{\lambda}{\rho c_p} \nabla \cdot \nabla T=0
 $$
 
-The above equation represents the transient advection-diffusion equation where the Darcy flux term contributes to the advection of the temperature and the temperature is diffused with the diffusion coefficient ($\lambda/(\rho c_p)$). This equation is also the temperature residual in our simulation to observe the convergence of our stencil solver.
+The above equation represents the transient advection-diffusion equation where the Darcy flux term contributes to the advection of the temperature and the temperature is diffused with the diffusion coefficient ($\lambda /(\rho c_p)$). This equation is also the temperature residual in our simulation to observe the convergence of our stencil-based solver.
 
 #### Boussinesq Approximation
 In order to account for the buoyancy which is observed by the change in fluid density as a function of temperature. We incorporate this via a linear dependency of fluid density on the temperature as shown below:
@@ -63,7 +63,7 @@ $$
 \rho=\rho_0\left[1-\alpha\left(T-T_0\right)\right]
 $$
 
-However, one may think that so far we have assumed to incorporate an incompressible fluid in all our equations. Our approach continues to remain correct since we have applied what is known as the Boussinesq approximation. The gravitational term $\\rho \boldsymbol{g}$ is responsible for the dominant contribution in the force balance and hence, variations in density due to the temperature are accounted for in the gravitational term only. Substituting this linear dependency of density on the temperature in the Darcy flux we obtain:
+However, one may think that so far we have assumed to incorporate an incompressible fluid in all our equations. Our approach continues to remain correct since we have applied what is known as the Boussinesq approximation. The gravitational term $\rho \boldsymbol{g}$ is responsible for the dominant contribution in the force balance and hence, variations in density due to the temperature are accounted for in the gravitational term only. Substituting this linear dependency of density on the temperature in the Darcy flux we obtain:
 
 $$
 \boldsymbol{q}_{\boldsymbol{D}}=-\frac{k}{\eta}\left(\nabla P-\rho_0\left[1-\alpha\left(T-T_0\right)\right] \boldsymbol{g}\right)
@@ -79,7 +79,15 @@ To obtain our final system of coupled PDEs, we incorporate two simplifications t
 Incorporation of these simplifications yields the following system of coupled PDEs:
 
 $$
-\boldsymbol{q}_D=-\frac{k}{\eta}\left(\nabla p-\rho_0 \alpha \boldsymbol{g} T\right) \\ \nabla \cdot \boldsymbol{q}_D=0 \\ \boldsymbol{q}_T=-\frac{\lambda}{\rho_0 c_p} \nabla T 
+\boldsymbol{q}_D=-\frac{k}{\eta}\left(\nabla p-\rho_0 \alpha \boldsymbol{g} T\right) 
+$$ 
+
+$$
+\nabla \cdot \boldsymbol{q}_D=0 
+$$ 
+
+$$
+\boldsymbol{q}_T=-\frac{\lambda}{\rho_0 c_p} \nabla T 
 $$
 
 $$
@@ -144,9 +152,14 @@ In the section, we develop a multi-xPU configurated simulation for a three-dimen
 
 *Figure 5: Temperature distribution of a three-dimensional porous convection model simulated on 8 GPUs*
 
-## Conclusion
+## Discussions and Conclusion
+
+The 2D porous convection model indicates a temperature Gaussian that moves in the upward direction due to the temperature gradient in between the y-axis boundaries. Similarly, in the 3D Porous Convection model the final temperature profile indicates a heat flux between the xy plane boundaries due to a temperature gradient. Our Julia scripts are able to successfully simulate both configurations on CPUs as well as GPUs but we perform our simulation on a single GPU since we wish to achieve faster convergence for large grid sizes and for a greater number of physical time steps.
+
+The 3D Porous Convection simulation on 8 GPUs also indicates a heat flux between the xy plane boundaries due to a temperature gradient. Leveraging [ImplicitGlobalGrid.jl](https://github.com/eth-cscs/ImplicitGlobalGrid.jl) for our multi-xPU simulation of the 3D Porous Convection model enables us to simulate the physical process in a domain that is 8 times the size of the domain simulated by a single GPU within comparable order of the execution time (for the same number of physical time steps). Our Julia script also allows for simulations on multiple CPU cores but for faster convergence we have yet again opted for a multi-GPU configuration in our simulation.
+
 The simulations presented in the sections above are in tandem with the results expected from physics and this indicates that the combined use of 
 [ParallelStencil.jl](https://github.com/omlins/ParallelStencil.jl) and [ImplicitGlobalGrid.jl](https://github.com/eth-cscs/ImplicitGlobalGrid.jl) is truly a remarkable tool for solving physical processes governed by partial differential equations. 
 
-
 ## Bonus Section: Documentation 
+In this bonus section, we use [Literate.jl](https://github.com/fredrikekre/Literate.jl) to automatically render Julia scripts into Markdown files. The Julia script is titled `bin_io_script.jl` and the Markdown rendered file obtained via [Literate.jl](https://github.com/fredrikekre/Literate.jl), present in the `md` directory, is titled `bin_io_script.md`. 
