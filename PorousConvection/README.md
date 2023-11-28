@@ -8,7 +8,7 @@ In this mini-project, a stencil-based solver has been developed to simulate poro
 
 ## Physical Model (Partial Differential Equations)
 
-##### Fluid Flow in Porous Media
+#### Fluid Flow in Porous Media
 
 In our physical model, the fluid is considered to be incompressible (i.e., $\rho$ remains constant) and hence we obtain the following conservation of mass equation.
 
@@ -18,7 +18,7 @@ $$
 
 Here, $\phi$ is the porosity which remains constant if our porous material is undeformable. In our numerical solution, we assume the porosity to be constant.
 
-##### Darcy's Law
+#### Darcy's Law
 
 We define a quantity $\boldsymbol{q}_{\boldsymbol{D}} = \phi \boldsymbol{v}$ called the Darcy flux or Darcy velocity.  
 
@@ -32,7 +32,7 @@ $$
 \nabla \cdot\left[\frac{k}{\eta}(\nabla p-\rho \boldsymbol{g})\right]=0
 $$
 
-##### Heat Convection in Porous Media
+#### Heat Convection in Porous Media
 
 The following equation represents the energy conservation equation for the fluid in porous media:
 
@@ -56,7 +56,7 @@ $$
 
 The above equation represents the transient advection-diffusion equation where the Darcy flux term contributes to the advection of the temperature and the temperature is diffused with the diffusion coefficient ($\lambda/(\rho c_p)$). This equation is also the temperature residual in our simulation to observe the convergence of our stencil solver.
 
-##### Boussinesq Approximation
+#### Boussinesq Approximation
 In order to account for the buoyancy which is observed by the change in fluid density as a function of temperature. We incorporate this via a linear dependency of fluid density on the temperature as shown below:
 
 $$
@@ -69,17 +69,21 @@ $$
 \boldsymbol{q}_{\boldsymbol{D}}=-\frac{k}{\eta}\left(\nabla P-\rho_0\left[1-\alpha\left(T-T_0\right)\right] \boldsymbol{g}\right)
 $$
 
-##### Final System of PDEs
+#### Final System of PDEs
 To obtain our final system of coupled PDEs, we incorporate two simplifications to our equations:
 
 1. We do not solve for the absolute values of temperature and pressure but their deviations from the hydrostatic gradient and the reference temperature respectively.
 
-2. The Fourier heat flux () is replaced by the temperature diffusion flux $$.
+2. The Fourier heat flux ($\boldsymbol{q}_F$) is replaced by the temperature diffusion flux $\boldsymbol{q}_T = \boldsymbol{q}_F / (\rho_0 c_p)$, this reduces the number of independent variables within our code.
 
 Incorporation of these simplifications yields the following system of coupled PDEs:
 
 $$
-\begin{gathered} \boldsymbol{q}_D=-\frac{k}{\eta}\left(\nabla p-\rho_0 \alpha \boldsymbol{g} T\right) \\ \nabla \cdot \boldsymbol{q}_D=0 \\ \boldsymbol{q}_T=-\frac{\lambda}{\rho_0 c_p} \nabla T \\ \frac{\partial T}{\partial t}+\frac{1}{\phi} \boldsymbol{q}_{\boldsymbol{D}} \cdot \nabla T+\nabla \cdot \boldsymbol{q}_T=0 \end{gathered}
+\boldsymbol{q}_D=-\frac{k}{\eta}\left(\nabla p-\rho_0 \alpha \boldsymbol{g} T\right) \\ \nabla \cdot \boldsymbol{q}_D=0 \\ \boldsymbol{q}_T=-\frac{\lambda}{\rho_0 c_p} \nabla T 
+$$
+
+$$
+\frac{\partial T}{\partial t}+\frac{1}{\phi} \boldsymbol{q}_{\boldsymbol{D}} \cdot \nabla T+\nabla \cdot \boldsymbol{q}_T=0
 $$
 
 ## Numerical Method (Pseudo-transient solver)
@@ -90,6 +94,7 @@ Inertial terms are added to the flux equations as follows:
 $$
  \theta_D \frac{\partial \boldsymbol{q}_{\boldsymbol{D}}}{\partial \tau}+\boldsymbol{q}_{\boldsymbol{D}}=-\frac{k}{\eta}\left(\nabla p-\rho_0 \alpha \boldsymbol{g} T\right) 
 $$
+
 $$
  \theta_T \frac{\partial \boldsymbol{q}_{\boldsymbol{T}}}{\partial \tau}+\boldsymbol{q}_{\boldsymbol{T}}=-\frac{\lambda}{\rho_0 c_p} \nabla T
 $$
@@ -114,22 +119,29 @@ The pseudo-transient method is quite a powerful tool as it allows for implicitly
 In this section, we develop a two-dimensional porous convection model having a domain size `nx, ny = 1023, 511` for `nt = 4000` iterations. The simulation can be performed on both GPUs and CPUs via a single code file titled `PorousConvection_2D_xpu.jl`.
 
 ![Figure 1](./docs/porous_convection_2D_xpu_final.gif)
+
 *Figure 1: Temperature distribution and two-dimensional porous convection model simulated on a single GPU*
 
 ## Section 2: Porous Convection 3D
 In this section, we develop a three-dimensional porous convection model having a domain size `nx, ny, nz = 255, 127, 127` for `nt = 2000` iterations. The simulation can be performed on both GPUs and CPUs via a single code file titled `PorousConvection_3D_xpu.jl`.
 
 ![Figure 2](./docs/T_3D_slice_final.png)
+
 *Figure 2: 2D slice of the final temperature distribution of a three-dimensional porous convection model simulated on a single GPU*
+
 ![Figure 3](./docs/T_3D.png)
+
 *Figure 3: Final temperature distribution of a three-dimensional porous convection model simulated on a single GPU*
 
 ## Section 3: Porous Convection 3D MPI
 In the section, we develop a multi-xPU configurated simulation for a three-dimensional porous convection model having a global domain size `nx, ny, nz = 508, 252, 252` for `nt = 2000` iterations. The simulation can be performed on multi-xPU configurations via the code file titled `PorousConvection_3D_multixpu.jl`.
 
 ![Figure 4](./docs/T_3D_slice_mpi_final.png)
+
 *Figure 4: 2D slice of the final temperature distribution of a three-dimensional porous convection model simulated on 8 GPUs*
+
 ![Figure 5](./docs/porous_convection_3D_multixpu.gif)
+
 *Figure 5: Temperature distribution of a three-dimensional porous convection model simulated on 8 GPUs*
 
 ## Conclusion
